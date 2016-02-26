@@ -207,6 +207,23 @@ class travis(object):
                 ' chown %s:%s /entrypoint.sh \\' % (
                     self.docker_user, self.docker_user) + \
                 '\n    && ' + sudo_prefix + ' chmod +x /entrypoint.sh'
+            # SEDS for XMLRunner
+            print("Setting up XMLRunner & Coverage")
+            module_py = '%s/*/openerp/modules/module.py' % os.getenv("HOME")
+            server_py = '%s/*/openerp/service/server.py' % os.getenv("HOME")
+            xml_sed = """sed -i "s/unittest.TextTestRunner(/XMLTestRunner(output=TEST_RESULTS,/g" %s"""
+            imports = [
+                'import unittest',
+                'from xmlrunner import XMLTestRunner',
+                'import coverage',
+                'TEST_RESULTS = "/_results"',
+            ]
+            test_sed = "sed -i 's|import unittest|" + '\\n'.join(imports) + "|g' "
+            cmd_str += cmd + module_py + '\n'
+            cmd_str += cmd + server_py + '\n'
+            cmd_str += '%s\n' % xml_sed % module_py
+            cmd_str += '%s\n' % xml_sed % server_py
+            # Back to original script
             cmd_str += '\nENTRYPOINT /entrypoint.sh'
         return cmd_str
 
