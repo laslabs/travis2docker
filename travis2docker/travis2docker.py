@@ -342,6 +342,8 @@ class travis(object):
                         self.docker_user, home_user_path, sudo_prefix) + \
                   "\nRUN " + ' \\\n    && '.join(cmd_git_clone) + \
                   "\n"
+            # Fix https://github.com/npm/npm/issues/9863 by removing JsHint dir
+            cmd += "RUN rm -Rf /usr/lib/node_modules/jshint"
         return cmd
 
     def get_travis2docker_iter(self):
